@@ -15,6 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String barcode = "";
+  ScanOptions scanOptions = ScanOptions();
 
   @override
   initState() {
@@ -31,6 +32,13 @@ class _MyAppState extends State<MyApp> {
           body: new Center(
             child: new Column(
               children: <Widget>[
+                SwitchListTile(
+                  title: Text("Wait a tap to capture"),
+                  value: scanOptions.waitTap,
+                  onChanged: (value) => setState(() {
+                    scanOptions.waitTap = !scanOptions.waitTap;
+                  }),
+                ),
                 new Container(
                   child: new MaterialButton(
                       onPressed: scan, child: new Text("Scan")),
@@ -45,7 +53,7 @@ class _MyAppState extends State<MyApp> {
 
   Future scan() async {
     try {
-      String barcode = await BarcodeScanner.scan();
+      String barcode = await BarcodeScanner.scan(options: scanOptions);
       setState(() => this.barcode = barcode);
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
@@ -55,8 +63,9 @@ class _MyAppState extends State<MyApp> {
       } else {
         setState(() => this.barcode = 'Unknown error: $e');
       }
-    } on FormatException{
-      setState(() => this.barcode = 'null (User returned using the "back"-button before scanning anything. Result)');
+    } on FormatException {
+      setState(() => this.barcode =
+          'null (User returned using the "back"-button before scanning anything. Result)');
     } catch (e) {
       setState(() => this.barcode = 'Unknown error: $e');
     }
