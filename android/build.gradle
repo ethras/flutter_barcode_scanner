@@ -1,4 +1,4 @@
-group 'com.apptreesoftware.barcodescan'
+group 'com.ethras.barcodescan'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -25,6 +25,7 @@ rootProject.allprojects {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: "kotlin-android-extensions"
 
 android {
     compileSdkVersion 27
@@ -43,6 +44,10 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+}
+
+androidExtensions {
+    experimental = true
 }
 
 dependencies {

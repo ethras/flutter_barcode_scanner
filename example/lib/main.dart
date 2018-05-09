@@ -53,8 +53,8 @@ class _MyAppState extends State<MyApp> {
 
   Future scan() async {
     try {
-      String barcode = await BarcodeScanner.scan(options: scanOptions);
-      setState(() => this.barcode = barcode);
+      var barcodes = await BarcodeScanner.scan(options: scanOptions);
+      setState(() => this.barcode = barcodes.first.value);
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {

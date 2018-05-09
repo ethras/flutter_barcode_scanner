@@ -17,7 +17,7 @@
         android:label="barcode_scan_example"
         android:icon="@mipmap/ic_launcher">
         <activity
-            android:name="com.apptreesoftware.barcodescanexample.MainActivity"
+            android:name="com.ethras.barcodescanexample.MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale"
@@ -35,6 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.apptreesoftware.barcodescan.barcode.BarcodeCaptureActivity"/>
+        <activity android:name="com.ethras.barcodescan.barcode.BarcodeCaptureActivity"/>
     </application>
 </manifest>

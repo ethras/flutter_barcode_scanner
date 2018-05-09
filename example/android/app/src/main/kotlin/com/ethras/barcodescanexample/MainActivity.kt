@@ -1,4 +1,4 @@
-package com.apptreesoftware.barcodescanexample
+package com.ethras.barcodescanexample
 
 import android.os.Bundle
 

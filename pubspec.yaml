@@ -1,8 +1,8 @@
-name: barcode_scan
+name: barcode_scanner
 description: A flutter plugin for scanning 2D barcodes and QRCodes.
 version: 0.0.3
-author: Matthew Smith<matthew.smith@apptreesoftware.com>
-homepage: https://github.com/apptreesoftware/flutter_barcode_reader
+author: Vladimir Mbassi<vladimirmbassi@gmail.com>
+homepage: https://github.com/Ethras/flutter_barcode_scanner
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
 # The following section is specific to Flutter.
 flutter:
   plugin:
-    androidPackage: com.apptreesoftware.barcodescan
+    androidPackage: com.ethras.barcodescan
     pluginClass: BarcodeScanPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
