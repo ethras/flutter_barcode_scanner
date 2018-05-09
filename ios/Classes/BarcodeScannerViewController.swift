@@ -7,7 +7,9 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
     lazy private var previewView: UIView = UIView.init(frame: view.bounds)
     lazy private var scanner: MTBBarcodeScanner = MTBBarcodeScanner(previewView: previewView)
     public weak var delegate: BarcodeScannerViewControllerDelegate?
-    private var codeFrameView: UIView!
+    private var tap: UITapGestureRecognizer!
+    
+    private var codeFrameViews: [CodeFrameView]!
     
     private var currentCode: String?
     private var scanOptions: ScanOptions!
@@ -31,34 +33,31 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
         previewView.frame = view.bounds
+        previewView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(previewView)
-        
-        codeFrameView = UIView()
-        
-        // Enable or disable scan on tap
-        if (scanOptions.waitTap) {
-            let tap = UITapGestureRecognizer(target: self, action: #selector(self.tapToScan(_:)))
-            tap.delegate = self
-            codeFrameView.addGestureRecognizer(tap)
-        }
-        
-        if let qrCodeFrameView = codeFrameView {
-            qrCodeFrameView.layer.borderColor = UIColor.green.cgColor
-            qrCodeFrameView.layer.borderWidth = 2
-            view.addSubview(qrCodeFrameView)
-            view.bringSubview(toFront: qrCodeFrameView)
-        }
         
         // Navigation item
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.cancel))
         if hasTorch {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Flash On", style: .plain, target: self, action: #selector(self.toggle))
         }
+        
+        codeFrameViews = []
+        for _ in 1...10 {
+            let codeView = CodeFrameView()
+            if (scanOptions.waitTap) {
+                codeView.addTarget(self, action: #selector(self.tapToScan), for: .touchUpInside)
+            }
+            codeFrameViews.append(codeView)
+            self.view.addSubview(codeView)
+            self.view.bringSubview(toFront: codeView)
+        }
+        
     }
-
+    
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-            self.previewView.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.size.height, height: self.view.frame.size.width)
+        self.previewView.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.size.height, height: self.view.frame.size.width)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -88,40 +87,37 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
         dismiss(animated: true, completion: nil)
     }
     
-    @objc func tapToScan(_ gestureRecognizer: UITapGestureRecognizer) {
-        print("Tapped")
-        validateScan()
+    
+    private func validateScan(code: AVMetadataMachineReadableCodeObject) {
+        self.delegate?.barcodeScannerViewController(self, didScanBarcodeWithResult: code.stringValue!)
+            self.dismiss(animated: false, completion: nil)
     }
     
-    private func validateScan() {
-        if let currentCode = currentCode {
-            self.delegate?.barcodeScannerViewController(self, didScanBarcodeWithResult: currentCode)
-            self.dismiss(animated: false, completion: nil)
-        }
+    @objc func tapToScan(sender: UIButton!) {
+        print("Tapped ")
+        let codeView = sender as! CodeFrameView
+        let code = codeView.code!
+        codeView.layer.borderColor = UIColor.red.cgColor
+        validateScan(code: code)
     }
     
     func startScan() {
         do {
             try self.scanner.startScanning(resultBlock: { codes in
                 if let codes = codes {
-                    if codes.count == 0 {
-                        self.codeFrameView.frame = CGRect.zero
+                    // Remove all frame from superview
+                    for codeView in self.codeFrameViews {
+                        codeView.reset()
                     }
+                    
+                    var i = 0
                     for code in codes {
-                        let stringValue = code.stringValue!
-                        print("Found code: \(stringValue)")
-                        var bounds = code.bounds
-                        if (code.bounds.height < CGFloat(5)) {
-                            var tmp = code.bounds
-                            tmp.size.height = CGFloat(20)
-                            bounds = tmp
-                        }
-                
-                        self.codeFrameView.frame = bounds
-                        self.currentCode = stringValue
-                        
-                        if (!self.scanOptions.waitTap) {
-                            self.validateScan()
+                        if i < self.codeFrameViews.count {
+                            self.codeFrameViews[i].setCode(code: code)
+                            i += 1
+                            if (!self.scanOptions.waitTap) {
+                                self.validateScan(code: code)
+                            }
                         }
                     }
                 }
@@ -169,7 +165,7 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
         if device == nil {
             return
         }
-    
+        
         if (device?.hasFlash)! && (device?.hasTorch)! {
             try? device?.lockForConfiguration()
             if on {
