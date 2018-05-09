@@ -5,17 +5,21 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
     private var result: FlutterResult!
     private var _hostViewController: UIViewController!
     private var _navigationViewController: UINavigationController!
+    private var _scanOptions: ScanOptions!
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "com.apptreesoftware.barcode_scan", binaryMessenger: registrar.messenger())
     let instance = SwiftFlutterBarcodeReaderPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     instance._hostViewController = UIApplication.shared.delegate?.window??.rootViewController
+    instance._scanOptions = ScanOptions()
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     if ("scan" == call.method) {
         self.result = result
+        let dic = call.arguments as? [String: Any]
+        _scanOptions.waitTap = dic?["waitTap"] as! Bool
         showBarcodeView()
     }
     else {
@@ -24,7 +28,7 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
     
   }
     func showBarcodeView() {
-        let scannerViewController = BarcodeScannerViewController()
+        let scannerViewController = BarcodeScannerViewController(options: _scanOptions)
         let navigationController = UINavigationController(rootViewController: scannerViewController as? UIViewController ?? UIViewController())
         scannerViewController.delegate = self
         _hostViewController.present(navigationController, animated: false, completion: nil)
@@ -41,4 +45,8 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
             result(FlutterError(code: errorCode, message: nil, details: nil))
         }
     }
+}
+
+class ScanOptions {
+    var waitTap: Bool = false
 }
