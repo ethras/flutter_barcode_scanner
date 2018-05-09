@@ -15,7 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String barcode = "";
-  ScanOptions scanOptions = ScanOptions();
+  ScanOptions scanOptions = new ScanOptions();
 
   @override
   initState() {
@@ -32,8 +32,8 @@ class _MyAppState extends State<MyApp> {
           body: new Center(
             child: new Column(
               children: <Widget>[
-                SwitchListTile(
-                  title: Text("Wait a tap to capture"),
+                new SwitchListTile(
+                  title: new Text("Wait a tap to capture"),
                   value: scanOptions.waitTap,
                   onChanged: (value) => setState(() {
                     scanOptions.waitTap = !scanOptions.waitTap;
