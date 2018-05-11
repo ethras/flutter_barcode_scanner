@@ -6,13 +6,9 @@
 //
 
 import Foundation
+import AVFoundation
 
 protocol BarcodeScannerViewControllerDelegate: class {
-    func barcodeScannerViewController(_ controller: BarcodeScannerViewController, didScanBarcodeWithResult result: String)
+    func barcodeScannerViewController(_ controller: BarcodeScannerViewController, didScanBarcodeWithResult result: [AVMetadataMachineReadableCodeObject])
     func barcodeScannerViewController(_ controller: BarcodeScannerViewController, didFailWithErrorCode errorCode: String)
 }
-
-protocol CodeFrameViewDelegate: class {
-    func codeFrameView(_ view: CodeFrameView, result: String)
-}
-

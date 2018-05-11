@@ -11,7 +11,7 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
     
     private var codeFrameViews: [CodeFrameView]!
     
-    private var currentCode: String?
+    private var _codes: [AVMetadataMachineReadableCodeObject]!
     private var scanOptions: ScanOptions!
     
     init(options: ScanOptions) {
@@ -89,7 +89,7 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
     
     
     private func validateScan(code: AVMetadataMachineReadableCodeObject) {
-        self.delegate?.barcodeScannerViewController(self, didScanBarcodeWithResult: code.stringValue!)
+        self.delegate?.barcodeScannerViewController(self, didScanBarcodeWithResult: _codes)
             self.dismiss(animated: false, completion: nil)
     }
     
@@ -97,7 +97,6 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
         print("Tapped ")
         let codeView = sender as! CodeFrameView
         let code = codeView.code!
-        codeView.layer.borderColor = UIColor.red.cgColor
         validateScan(code: code)
     }
     
@@ -105,6 +104,8 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
         do {
             try self.scanner.startScanning(resultBlock: { codes in
                 if let codes = codes {
+                    self._codes = codes
+                    
                     // Remove all frame from superview
                     for codeView in self.codeFrameViews {
                         codeView.reset()
@@ -113,6 +114,7 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
                     var i = 0
                     for code in codes {
                         if i < self.codeFrameViews.count {
+                            self.codeFrameViews[0].setPrimary()
                             self.codeFrameViews[i].setCode(code: code)
                             i += 1
                             if (!self.scanOptions.waitTap) {

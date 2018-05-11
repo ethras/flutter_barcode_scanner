@@ -11,7 +11,6 @@ import AVFoundation
 
 class CodeFrameView: UIButton {
     var code: AVMetadataMachineReadableCodeObject!
-    public weak var delegate: CodeFrameViewDelegate?
     
     init() {
         super.init(frame: CGRect.zero)
@@ -29,6 +28,10 @@ class CodeFrameView: UIButton {
         super.init(coder: aDecoder)
     }
     
+    func setPrimary() {
+        layer.borderColor = UIColor.red.cgColor
+    }
+    
     func setCode(code: AVMetadataMachineReadableCodeObject) {
         self.code = code
         var tmpBounds = code.bounds
@@ -39,6 +42,7 @@ class CodeFrameView: UIButton {
     }
     
     func reset() {
+        layer.borderColor = UIColor.green.cgColor
         frame = CGRect.zero
         code = nil
     }
