@@ -7,7 +7,7 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
     private var _hostViewController: UIViewController!
     private var _navigationViewController: UINavigationController!
     private var _scanOptions: ScanOptions!
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "com.ethras.barcode_scan", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterBarcodeReaderPlugin()
@@ -15,26 +15,45 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
         instance._hostViewController = UIApplication.shared.delegate?.window??.rootViewController
         instance._scanOptions = ScanOptions()
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if ("scan" == call.method) {
             self.result = result
             let dic = call.arguments as? [String: Any]
             _scanOptions.waitTap = dic?["waitTap"] as! Bool
+            let formats = dic?["formats"] as! [String]
+
+            if (formats.count == 1 && formats[0] == "ALL_FORMATS") {
+                _scanOptions.formats = []
+            } else {
+                _scanOptions.formats = formats.compactMap { format -> AVMetadataObject.ObjectType? in
+                    getObjectType(formatString: format)
+                }
+            }
+
             showBarcodeView()
-        }
-        else {
+        } else {
             result(FlutterMethodNotImplemented)
         }
-        
+
     }
+
     func showBarcodeView() {
         let scannerViewController = BarcodeScannerViewController(options: _scanOptions)
-        let navigationController = UINavigationController(rootViewController: scannerViewController as? UIViewController ?? UIViewController())
+        let navigationController = UINavigationController(rootViewController: scannerViewController as UIViewController)
         scannerViewController.delegate = self
         _hostViewController.present(navigationController, animated: false, completion: nil)
     }
-    
+
+    func getObjectType(formatString: String) -> AVMetadataObject.ObjectType? {
+        switch formatString {
+        case "QR_CODE":
+            return AVMetadataObject.ObjectType.qr
+        default:
+            return nil
+        }
+    }
+
     func getTypeStringFormat(code: AVMetadataMachineReadableCodeObject) -> String {
         let type: String = {
             switch code.type {
@@ -68,7 +87,7 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
         }()
         return type
     }
-    
+
     func barcodeScannerViewController(_ controller: BarcodeScannerViewController, didScanBarcodeWithResult result: [AVMetadataMachineReadableCodeObject]) {
         if (self.result != nil) {
             var array: [[String: String]] = []
@@ -79,9 +98,9 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
             self.result(array)
         }
     }
-    
+
     func barcodeScannerViewController(_ controller: BarcodeScannerViewController, didFailWithErrorCode errorCode: String) {
-        if (self.result != nil)  {
+        if (self.result != nil) {
             result(FlutterError(code: errorCode, message: nil, details: nil))
         }
     }
@@ -89,4 +108,5 @@ public class SwiftFlutterBarcodeReaderPlugin: NSObject, FlutterPlugin, BarcodeSc
 
 class ScanOptions {
     var waitTap: Bool = false
+    var formats: [AVMetadataObject.ObjectType] = []
 }

@@ -113,12 +113,15 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
                     
                     var i = 0
                     for code in codes {
-                        if i < self.codeFrameViews.count {
-                            self.codeFrameViews[0].setPrimary()
-                            self.codeFrameViews[i].setCode(code: code)
-                            i += 1
-                            if (!self.scanOptions.waitTap) {
-                                self.validateScan(code: code)
+                        // Filter by wanted formats
+                        if (self.scanOptions.formats.contains(code.type) || self.scanOptions.formats.isEmpty){
+                            if i < self.codeFrameViews.count {
+                                self.codeFrameViews[0].setPrimary()
+                                self.codeFrameViews[i].setCode(code: code)
+                                i += 1
+                                if (!self.scanOptions.waitTap) {
+                                    self.validateScan(code: code)
+                                }
                             }
                         }
                     }
