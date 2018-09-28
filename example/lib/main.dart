@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(new MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => new _MyAppState();
+  _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   String barcode = "";
-  ScanOptions scanOptions = new ScanOptions();
+  ScanOptions scanOptions = ScanOptions();
 
   @override
   initState() {
@@ -24,27 +24,37 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-          appBar: new AppBar(
-            title: new Text('Barcode Scanner Example'),
+    return MaterialApp(
+      home: Scaffold(
+          appBar: AppBar(
+            title: Text('Barcode Scanner Example'),
           ),
-          body: new Center(
-            child: new Column(
+          body: Center(
+            child: Column(
               children: <Widget>[
-                new SwitchListTile(
-                  title: new Text("Wait a tap to capture"),
+                DropdownButton(
+                    value: scanOptions.formats[0],
+                    items: BarcodeFormat.values.map((format) {
+                      return DropdownMenuItem<BarcodeFormat>(
+                          child: Text(format.toString()), value: format);
+                    }).toList(),
+                    onChanged: (format) {
+                      setState(() {
+                        scanOptions.formats = [format];
+                      });
+                    }),
+                SwitchListTile(
+                  title: Text("Wait a tap to capture"),
                   value: scanOptions.waitTap,
                   onChanged: (value) => setState(() {
-                    scanOptions.waitTap = !scanOptions.waitTap;
-                  }),
+                        scanOptions.waitTap = !scanOptions.waitTap;
+                      }),
                 ),
-                new Container(
-                  child: new MaterialButton(
-                      onPressed: scan, child: new Text("Scan")),
+                Container(
+                  child: MaterialButton(onPressed: scan, child: Text("Scan")),
                   padding: const EdgeInsets.all(8.0),
                 ),
-                new Text(barcode),
+                Text(barcode),
               ],
             ),
           )),

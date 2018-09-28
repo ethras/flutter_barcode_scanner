@@ -12,6 +12,24 @@ class Barcode {
   }
 }
 
+//-----------------------
+// Format
+
+enum BarcodeFormat {
+  AllFormats,
+  QrCode,
+}
+
+String barcodeFormatToString(BarcodeFormat format) {
+  switch (format) {
+    case BarcodeFormat.AllFormats:
+      return "ALL_FORMATS";
+    case BarcodeFormat.QrCode:
+      return "QR_CODE";
+  }
+  return "ALL_FORMATS";
+}
+
 class BarcodeScanner {
   static const CameraAccessDenied = 'PERMISSION_NOT_GRANTED';
   static const MethodChannel _channel =
@@ -28,9 +46,14 @@ class BarcodeScanner {
 
 class ScanOptions {
   bool waitTap = false;
+  List<BarcodeFormat> formats = [BarcodeFormat.AllFormats];
 
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> arguments = {'waitTap': waitTap};
+    Map<String, dynamic> arguments = {
+      'waitTap': waitTap,
+      'formats':
+          formats.map((format) => barcodeFormatToString(format)).toList(),
+    };
     return arguments;
   }
 }

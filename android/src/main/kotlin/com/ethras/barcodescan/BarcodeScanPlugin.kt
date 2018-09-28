@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 
 import com.ethras.barcodescan.barcode.BarcodeCaptureActivity
+import com.ethras.barcodescan.barcode.BarcodeFormats
 import com.ethras.barcodescan.ui.CameraSource
 import com.ethras.barcodescan.util.AbstractCaptureActivity
 import com.ethras.barcodescan.util.MobileVisionException
@@ -29,7 +30,7 @@ class BarcodeScanPlugin private constructor(private val activity: Activity) : Me
 
     private var useFlash = false
     private var autoFocus = true
-    private var formats = Barcode.ALL_FORMATS
+    private var formats: Int = Barcode.ALL_FORMATS
     private var multiple = false
     private var waitTap = false
     private var showText = false
@@ -51,7 +52,8 @@ class BarcodeScanPlugin private constructor(private val activity: Activity) : Me
         }
 
         if (arguments.containsKey("formats")) {
-            formats = arguments["formats"] as Int
+            val formatsString = (arguments["formats"] as List<*>).map { it -> it.toString() }
+            formats = BarcodeFormats.intFromStringList(formatsString)
         }
 
         if (arguments.containsKey("multiple")) {
@@ -146,12 +148,12 @@ class BarcodeScanPlugin private constructor(private val activity: Activity) : Me
             return false
         }
 
-        if (grantResults.size != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             return true
         }
 
         result!!.error("Permission not granted: results len = " + grantResults.size +
-                " Result code = " + if (grantResults.size > 0) grantResults[0] else "(empty)", null, null)
+                " Result code = " + if (grantResults.isNotEmpty()) grantResults[0] else "(empty)", null, null)
 
         return false
     }
