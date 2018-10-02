@@ -26,7 +26,7 @@ import java.util.*
  * FlutterMobileVisionPlugin
  */
 class BarcodeScanPlugin private constructor(private val activity: Activity) : MethodCallHandler, PluginRegistry.ActivityResultListener, PluginRegistry.RequestPermissionsResultListener {
-    private var result: Result? = null
+    private lateinit var result: Result
 
     private var useFlash = false
     private var autoFocus = true
@@ -127,14 +127,16 @@ class BarcodeScanPlugin private constructor(private val activity: Activity) : Me
                             ret["format"] = barcode.getFormatString()
                             list.add(ret)
                         }
-                        result!!.success(list)
+                        result.success(list)
                         return true
                     }
                 }
-                result!!.error("No barcode captured, intent data is null", null, null)
+                else {
+                    result.error("No barcode captured, intent data is null", null, null)
+                }
             } else if (resultCode == CommonStatusCodes.ERROR) {
                 val e = intent!!.getParcelableExtra<MobileVisionException>(AbstractCaptureActivity.ERROR)
-                result!!.error(e.message, null, e)
+                result.error(e.message, null, e)
             }
         }
         return false
@@ -144,7 +146,7 @@ class BarcodeScanPlugin private constructor(private val activity: Activity) : Me
                                             grantResults: IntArray): Boolean {
 
         if (requestCode != RC_HANDLE_CAMERA_PERM) {
-            result!!.error("Got unexpected permission result: $requestCode", null, null)
+            result.error("Got unexpected permission result: $requestCode", null, null)
             return false
         }
 
@@ -180,7 +182,7 @@ class BarcodeScanPlugin private constructor(private val activity: Activity) : Me
     }
 }
 
-fun  Barcode.getFormatString(): String {
+fun Barcode.getFormatString(): String {
     return when (this.valueFormat) {
         Barcode.ALL_FORMATS -> "ALL_FORMATS"
         Barcode.AZTEC -> "AZTEC"
