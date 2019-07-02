@@ -84,6 +84,7 @@ class BarcodeScannerViewController: UIViewController, UIGestureRecognizerDelegat
     }
     
     @objc func cancel() {
+        self.delegate?.barcodeScannerViewController(self, didScanBarcodeWithResult: [])
         dismiss(animated: true, completion: nil)
     }
     
